@@ -1,0 +1,12 @@
+Acknowledgements: dfkinds
+
+Copyright 2017 The dfKinds Project Authors.
+Please see the AUTHORS file for details on individual authors.
+
+dfKinds, or Digital Forensics kinds, provides data type and class definitions
+to provide consistent definitions of entities (or description of things) across
+different tools.
+
+dfKinds is currently developed and maintained by:
+* Daniel White
+* Joachim Metz
