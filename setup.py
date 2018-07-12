@@ -1,8 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Installation and deployment script."""
 
 from __future__ import print_function
+
 import sys
 
 try:
@@ -89,8 +90,21 @@ else:
           in_description = True
 
         elif line.startswith('%files'):
-          line = '%files -f INSTALLED_FILES -n {0:s}-%{{name}}'.format(
-              python_package)
+          # Cannot use %{_libdir} here since it can expand to "lib64".
+          lines = [
+              '%files -n {0:s}-%{{name}}'.format(python_package),
+              '%defattr(644,root,root,755)',
+              '%doc ACKNOWLEDGEMENTS AUTHORS LICENSE README',
+              '%{_prefix}/lib/python*/site-packages/**/*.py',
+              '%{_prefix}/lib/python*/site-packages/dfkinds*.egg-info/*',
+              '',
+              '%exclude %{_prefix}/share/doc/*',
+              '%exclude %{_prefix}/lib/python*/site-packages/**/*.pyc',
+              '%exclude %{_prefix}/lib/python*/site-packages/**/*.pyo',
+              '%exclude %{_prefix}/lib/python*/site-packages/**/__pycache__/*']
+
+          python_spec_file.extend(lines)
+          break
 
         elif line.startswith('%prep'):
           in_description = False
@@ -120,8 +134,8 @@ dfkinds_description = (
 
 dfkinds_long_description = (
     'dfKinds, or Digital Forensics kinds, provides data type and class '
-    'definitions to provide consistent definitions of entities (or '
-    'description of things) across different tools.')
+    'definitions to provide consistent definitions of entities (or description'
+    ' of things) across different tools.')
 
 setup(
     name='dfkinds',
@@ -142,7 +156,7 @@ setup(
         'Programming Language :: Python',
     ],
     packages=find_packages('.', exclude=[
-        'examples', 'tests', 'tests.*', 'utils']),
+        'tests', 'tests.*', 'utils']),
     package_dir={
         'dfkinds': 'dfkinds'
     },
