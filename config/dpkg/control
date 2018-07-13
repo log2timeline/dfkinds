@@ -2,7 +2,7 @@ Source: dfkinds
 Section: python
 Priority: extra
 Maintainer: Log2Timeline maintainers <log2timeline-maintainers@googlegroups.com>
-Build-Depends: debhelper (>= 7), python-all (>= 2.7~), python-setuptools, python3-all (>= 3.4~), python3-setuptools
+Build-Depends: debhelper (>= 9), python-all (>= 2.7~), python-setuptools, python3-all (>= 3.4~), python3-setuptools
 Standards-Version: 3.9.5
 X-Python-Version: >= 2.7
 X-Python3-Version: >= 3.4
@@ -11,7 +11,7 @@ Homepage: https://github.com/log2timeline/dfkinds
 Package: python-dfkinds
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}
-Description: Digital Forensics kinds (types and classes).
+Description: Python 2 module of dfKinds
  dfKinds, or Digital Forensics kinds, provides data type and class definitions
  to provide consistent definitions of entities (or description of things) across
  different tools.
@@ -19,7 +19,7 @@ Description: Digital Forensics kinds (types and classes).
 Package: python3-dfkinds
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends}
-Description: Digital Forensics kinds (types and classes).
+Description: Python 3 module of dfKinds
  dfKinds, or Digital Forensics kinds, provides data type and class definitions
  to provide consistent definitions of entities (or description of things) across
  different tools.
