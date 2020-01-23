@@ -21,9 +21,11 @@ try:
 except ImportError:
   bdist_rpm = None
 
-if sys.version < '2.7':
-  print('Unsupported Python version: {0:s}.'.format(sys.version))
-  print('Supported Python versions are 2.7 or a later 2.x version.')
+version_tuple = (sys.version_info[0], sys.version_info[1])
+if version_tuple < (3, 5):
+  print((
+      'Unsupported Python version: {0:s}, version 3.5 or higher '
+      'required.').format(sys.version))
   sys.exit(1)
 
 # Change PYTHONPATH to include dfkinds so that we can get the version.
@@ -65,43 +67,54 @@ else:
       else:
         spec_file = bdist_rpm._make_spec_file(self)
 
-      if sys.version_info[0] < 3:
-        python_package = 'python'
-      else:
-        python_package = 'python3'
+      python_package = 'python3'
 
       description = []
+      requires = ''
       summary = ''
       in_description = False
 
       python_spec_file = []
       for line in iter(spec_file):
         if line.startswith('Summary: '):
-          summary = line
+          summary = line[9:]
 
         elif line.startswith('BuildRequires: '):
-          line = 'BuildRequires: {0:s}-setuptools'.format(python_package)
+          line = 'BuildRequires: {0:s}-setuptools, {0:s}-devel'.format(
+              python_package)
 
         elif line.startswith('Requires: '):
-          if python_package == 'python3':
-            line = line.replace('python', 'python3')
+          requires = line[10:]
+          continue
 
         elif line.startswith('%description'):
           in_description = True
 
+        elif line.startswith('python setup.py build'):
+          if python_package == 'python3':
+            line = '%py3_build'
+          else:
+            line = '%py2_build'
+
+        elif line.startswith('python setup.py install'):
+          if python_package == 'python3':
+            line = '%py3_install'
+          else:
+            line = '%py2_install'
+
         elif line.startswith('%files'):
-          # Cannot use %{_libdir} here since it can expand to "lib64".
           lines = [
               '%files -n {0:s}-%{{name}}'.format(python_package),
               '%defattr(644,root,root,755)',
-              '%doc ACKNOWLEDGEMENTS AUTHORS LICENSE README',
-              '%{_prefix}/lib/python*/site-packages/**/*.py',
-              '%{_prefix}/lib/python*/site-packages/dfkinds*.egg-info/*',
+              '%license LICENSE',
+              '%doc ACKNOWLEDGEMENTS AUTHORS README']
+
+          lines.extend([
+              '%{python3_sitelib}/dfkinds/*.py',
+              '%{python3_sitelib}/dfkinds*.egg-info/*',
               '',
               '%exclude %{_prefix}/share/doc/*',
-              '%exclude %{_prefix}/lib/python*/site-packages/**/*.pyc',
-              '%exclude %{_prefix}/lib/python*/site-packages/**/*.pyo',
-              '%exclude %{_prefix}/lib/python*/site-packages/**/__pycache__/*']
+              '%exclude %{python3_sitelib}/dfkinds/__pycache__/*'])
 
           python_spec_file.extend(lines)
           break
@@ -111,10 +124,16 @@ else:
 
           python_spec_file.append(
               '%package -n {0:s}-%{{name}}'.format(python_package))
-          python_spec_file.append('{0:s}'.format(summary))
-          python_spec_file.append('')
-          python_spec_file.append(
-              '%description -n {0:s}-%{{name}}'.format(python_package))
+          python_summary = 'Python 3 module of {0:s}'.format(summary)
+
+          if requires:
+            python_spec_file.append('Requires: {0:s}'.format(requires))
+
+          python_spec_file.extend([
+              'Summary: {0:s}'.format(python_summary),
+              '',
+              '%description -n {0:s}-%{{name}}'.format(python_package)])
+
           python_spec_file.extend(description)
 
         elif in_description:
@@ -150,7 +169,7 @@ setup(
         'bdist_msi': BdistMSICommand,
         'bdist_rpm': BdistRPMCommand},
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        '',
         'Environment :: Console',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
