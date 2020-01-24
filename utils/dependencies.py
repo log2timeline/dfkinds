@@ -4,12 +4,8 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import configparser
 import re
-
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
 
 
 class DependencyDefinition(object):
@@ -18,6 +14,8 @@ class DependencyDefinition(object):
   Attributes:
     dpkg_name (str): name of the dpkg package that provides the dependency.
     is_optional (bool): True if the dependency is optional.
+    l2tbinaries_macos_name (str): name of the l2tbinaries macos package that
+        provides the dependency.
     l2tbinaries_name (str): name of the l2tbinaries package that provides
         the dependency.
     maximum_version (str): maximum supported version.
@@ -25,6 +23,7 @@ class DependencyDefinition(object):
     name (str): name of (the Python module that provides) the dependency.
     pypi_name (str): name of the PyPI package that provides the dependency.
     python2_only (bool): True if the dependency is only supported by Python 2.
+    python3_only (bool): True if the dependency is only supported by Python 3.
     rpm_name (str): name of the rpm package that provides the dependency.
     version_property (str): name of the version attribute or function.
   """
@@ -38,12 +37,14 @@ class DependencyDefinition(object):
     super(DependencyDefinition, self).__init__()
     self.dpkg_name = None
     self.is_optional = False
+    self.l2tbinaries_macos_name = None
     self.l2tbinaries_name = None
     self.maximum_version = None
     self.minimum_version = None
     self.name = name
     self.pypi_name = None
     self.python2_only = False
+    self.python3_only = False
     self.rpm_name = None
     self.version_property = None
 
@@ -54,11 +55,13 @@ class DependencyDefinitionReader(object):
   _VALUE_NAMES = frozenset([
       'dpkg_name',
       'is_optional',
+      'l2tbinaries_macos_name',
       'l2tbinaries_name',
       'maximum_version',
       'minimum_version',
       'pypi_name',
       'python2_only',
+      'python3_only',
       'rpm_name',
       'version_property'])
 
@@ -87,10 +90,8 @@ class DependencyDefinitionReader(object):
     Yields:
       DependencyDefinition: dependency definition.
     """
-    config_parser = configparser.RawConfigParser()
-    # pylint: disable=deprecated-method
-    # TODO: replace readfp by read_file, check if Python 2 compatible
-    config_parser.readfp(file_object)
+    config_parser = configparser.ConfigParser(interpolation=None)
+    config_parser.read_file(file_object)
 
     for section_name in config_parser.sections():
       dependency_definition = DependencyDefinition(section_name)
@@ -140,7 +141,7 @@ class DependencyHelper(object):
       dependency (DependencyDefinition): dependency definition.
 
     Returns:
-      tuple: consists:
+      tuple: containing:
 
         bool: True if the Python module is available and conforms to
             the minimum required version, False otherwise.
@@ -171,7 +172,7 @@ class DependencyHelper(object):
       maximum_version (str): maximum version.
 
     Returns:
-      tuple: consists:
+      tuple: containing:
 
         bool: True if the Python module is available and conforms to
             the minimum required version, False otherwise.
@@ -245,36 +246,6 @@ class DependencyHelper(object):
     status_message = '{0:s} version: {1!s}'.format(module_name, module_version)
     return True, status_message
 
-  def _CheckSQLite3(self):
-    """Checks the availability of sqlite3.
-
-    Returns:
-      tuple: consists:
-
-        bool: True if the Python module is available and conforms to
-            the minimum required version, False otherwise.
-        str: status message.
-    """
-    # On Windows sqlite3 can be provided by both pysqlite2.dbapi2 and
-    # sqlite3. sqlite3 is provided with the Python installation and
-    # pysqlite2.dbapi2 by the pysqlite2 Python module. Typically
-    # pysqlite2.dbapi2 would contain a newer version of sqlite3, hence
-    # we check for its presence first.
-    module_name = 'pysqlite2.dbapi2'
-    minimum_version = '3.7.8'
-
-    module_object = self._ImportPythonModule(module_name)
-    if not module_object:
-      module_name = 'sqlite3'
-
-    module_object = self._ImportPythonModule(module_name)
-    if not module_object:
-      status_message = 'missing: {0:s}.'.format(module_name)
-      return False, status_message
-
-    return self._CheckPythonModuleVersion(
-        module_name, module_object, 'sqlite_version', minimum_version, None)
-
   def _ImportPythonModule(self, module_name):
     """Imports a Python module.
 
@@ -305,6 +276,7 @@ class DependencyHelper(object):
       result (bool): True if the Python module is available and conforms to
             the minimum required version, False otherwise.
       status_message (str): status message.
+      verbose_output (Optional[bool]): True if output should be verbose.
     """
     if not result or dependency.is_optional:
       if dependency.is_optional:
@@ -329,15 +301,8 @@ class DependencyHelper(object):
     print('Checking availability and versions of dependencies.')
     check_result = True
 
-    for module_name, dependency in sorted(self.dependencies.items()):
-      if module_name == 'sqlite3':
-        result, status_message = self._CheckSQLite3()
-      else:
-        result, status_message = self._CheckPythonModule(dependency)
-
-      if not result and module_name == 'lzma':
-        dependency.name = 'backports.lzma'
-        result, status_message = self._CheckPythonModule(dependency)
+    for _, dependency in sorted(self.dependencies.items()):
+      result, status_message = self._CheckPythonModule(dependency)
 
       if not result and not dependency.is_optional:
         check_result = False
