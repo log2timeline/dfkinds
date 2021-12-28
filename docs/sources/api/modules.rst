@@ -1,7 +1,7 @@
-acstore
+dfkinds
 =======
 
 .. toctree::
    :maxdepth: 4
 
-   acstore
+   dfkinds
