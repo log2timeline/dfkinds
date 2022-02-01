@@ -58,7 +58,7 @@ napoleon_include_special_with_doc = True
 # General information about the project.
 # pylint: disable=redefined-builtin
 project = 'dfKinds'
-copyright = 'The dfKinds Project Authors'
+copyright = 'The dfKinds authors'
 version = dfkinds.__version__
 release = dfkinds.__version__
 
