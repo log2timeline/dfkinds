@@ -189,6 +189,7 @@ setup(
     version=dfkinds.__version__,
     description=dfkinds_description,
     long_description=dfkinds_long_description,
+    long_description_content_type='text/plain',
     license='Apache License, Version 2.0',
     url='https://github.com/log2timeline/dfkinds',
     maintainer='Log2Timeline maintainers',
