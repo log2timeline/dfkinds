@@ -22,10 +22,9 @@ except ImportError:
   bdist_rpm = None
 
 version_tuple = (sys.version_info[0], sys.version_info[1])
-if version_tuple < (3, 6):
-  print((
-      'Unsupported Python version: {0:s}, version 3.6 or higher '
-      'required.').format(sys.version))
+if version_tuple < (3, 7):
+  print(f'Unsupported Python version: {sys.version:s}, version 3.7 or higher '
+        f'required.')
   sys.exit(1)
 
 # Change PYTHONPATH to include dfkinds so that we can get the version.
@@ -82,8 +81,8 @@ else:
           summary = line[9:]
 
         elif line.startswith('BuildRequires: '):
-          line = 'BuildRequires: {0:s}-setuptools, {0:s}-devel'.format(
-              python_package)
+          line = (f'BuildRequires: {python_package:s}-setuptools, '
+                  f'{python_package:s}-devel')
 
         elif line.startswith('Requires: '):
           requires = line[10:]
@@ -106,7 +105,7 @@ else:
 
         elif line.startswith('%files'):
           lines = [
-              '%files -n {0:s}-%{{name}}'.format(python_package),
+              f'%files -n {python_package:s}-%{{name}}',
               '%defattr(644,root,root,755)',
               '%license LICENSE',
               '%doc ACKNOWLEDGEMENTS AUTHORS README']
@@ -124,17 +123,16 @@ else:
         elif line.startswith('%prep'):
           in_description = False
 
-          python_spec_file.append(
-              '%package -n {0:s}-%{{name}}'.format(python_package))
-          python_summary = 'Python 3 module of {0:s}'.format(summary)
+          python_spec_file.append(f'%package -n {python_package:s}-%{{name}}')
+          python_summary = f'Python 3 module of {summary:s}'
 
           if requires:
-            python_spec_file.append('Requires: {0:s}'.format(requires))
+            python_spec_file.append(f'Requires: {requires:s}')
 
           python_spec_file.extend([
-              'Summary: {0:s}'.format(python_summary),
+              f'Summary: {python_summary:s}',
               '',
-              '%description -n {0:s}-%{{name}}'.format(python_package)])
+              f'%description -n {python_package:s}-%{{name}}'])
 
           python_spec_file.extend(description)
 
@@ -184,6 +182,12 @@ dfkinds_long_description = (
     'definitions to provide consistent definitions of entities (or description'
     ' of things) across different tools.')
 
+command_classes = {}
+if BdistMSICommand:
+  command_classes['bdist_msi'] = BdistMSICommand
+if BdistRPMCommand:
+  command_classes['bdist_rpm'] = BdistRPMCommand
+
 setup(
     name='dfkinds',
     version=dfkinds.__version__,
@@ -194,9 +198,7 @@ setup(
     url='https://github.com/log2timeline/dfkinds',
     maintainer='Log2Timeline maintainers',
     maintainer_email='log2timeline-maintainers@googlegroups.com',
-    cmdclass={
-        'bdist_msi': BdistMSICommand,
-        'bdist_rpm': BdistRPMCommand},
+    cmdclass=command_classes,
     classifiers=[
         '',
         'Environment :: Console',
