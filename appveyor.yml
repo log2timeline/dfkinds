@@ -3,13 +3,13 @@ environment:
   - DESCRIPTION: "Windows with 32-bit Python 3.11"
     MACHINE_TYPE: "x86"
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python310"
+    PYTHON: "C:\\Python311"
     PYTHON_VERSION: "3.11"
     L2TBINARIES_TRACK: "dev"
   - DESCRIPTION: "Windows with 64-bit Python 3.11"
     MACHINE_TYPE: "amd64"
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python310-x64"
+    PYTHON: "C:\\Python311-x64"
     PYTHON_VERSION: "3.11"
     L2TBINARIES_TRACK: "dev"
   - DESCRIPTION: "Mac OS with Python 3.11"
@@ -18,8 +18,6 @@ environment:
 
 install:
 - cmd: "%PYTHON%\\python.exe -m pip install -U pip setuptools twine wheel"
-- cmd: "%PYTHON%\\python.exe -m pip install pywin32 WMI"
-- cmd: "%PYTHON%\\python.exe %PYTHON%\\Scripts\\pywin32_postinstall.py -install"
 - ps: If ($isWindows) { .\config\appveyor\install.ps1 }
 - sh: config/appveyor/install.sh
 
