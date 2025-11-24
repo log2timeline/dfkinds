@@ -6,5 +6,5 @@ Module contents
 
 .. automodule:: dfkinds
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
