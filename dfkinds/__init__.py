@@ -6,4 +6,4 @@ provide consistent definitions of entities (or description of things) across
 different tools.
 """
 
-__version__ = '20251124'
+__version__ = '20251125'
