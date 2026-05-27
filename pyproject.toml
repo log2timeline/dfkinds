@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dfkinds"
-version = "20260526"
+version = "20260527"
 description = "Digital Forensics kinds (types and classes)"
 maintainers = [
     { name = "Log2Timeline maintainers", email = "log2timeline-maintainers@googlegroups.com" },
@@ -32,6 +32,15 @@ include = "\\.pyi?$"
 black = true
 non-cap = []
 non-strict = true
+
+[tool.l2tdevtools]
+name = "dfKinds"
+status = "experimental"
+description = """
+dfKinds, or Digital Forensics kinds, provides data type and class definitions \
+to provide consistent definitions of entities (or description of things) \
+across different tools. \
+"""
 
 [tool.setuptools]
 package-dir = {"dfkinds" = "dfkinds"}
