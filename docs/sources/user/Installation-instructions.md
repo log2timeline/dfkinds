@@ -14,7 +14,7 @@ cd dfkinds_venv
 source ./bin/activate
 ```
 
-Upgrade pip and install dfKinds dependencies:
+Upgrade pip and install dfKinds:
 
 ```bash
 pip install --upgrade pip
